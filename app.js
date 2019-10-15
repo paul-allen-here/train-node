@@ -5,6 +5,11 @@ const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const _ = require("lodash");
 const mongoose = require('mongoose');
+
+const session = require("express-session");
+const passport = require("passport");
+const passportLocalMongoose = require("passport-local-mongoose");
+
 const md5 = require("md5");
 
 const homeStartingContent = "Simple blog app.";
@@ -15,16 +20,25 @@ const app = express();
 
 app.set('view engine', 'ejs');
 
+app.use(bodyParser.urlencoded({extended: true}));
+app.use(express.static("public"));
+
+app.use(session({
+  secret: "ourlittlesecret.",
+  resave: false,
+  saveUninitialized: false
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+
 const uri = "mongodb+srv://vova:"+ process.env.BD_PASS +"@bloglvluptest-iyvhk.mongodb.net/blog_base?retryWrites=true&w=majority";
 mongoose.connect(uri, {useNewUrlParser: true, useUnifiedTopology: true }).then(
   () => {console.log("DB Connected")},
   () => {console.error(err)}
 );
 
-const postSchema = new mongoose.Schema ({
-  title: String,
-  content: String
-});
+mongoose.set("useCreateIndex", true);
 
 const userSchema = new mongoose.Schema ({
   name: String,
@@ -32,11 +46,22 @@ const userSchema = new mongoose.Schema ({
   password: String
 });
 
-const Post = mongoose.model("Post", postSchema);
+userSchema.plugin(passportLocalMongoose);
+
 const User = mongoose.model("User", userSchema);
 
-app.use(bodyParser.urlencoded({extended: true}));
-app.use(express.static("public"));
+passport.use(User.createStrategy());
+
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
+const postSchema = new mongoose.Schema ({
+  title: String,
+  content: String
+});
+
+const Post = mongoose.model("Post", postSchema);
+
 
 app.get("/", (req, res) => {
 
