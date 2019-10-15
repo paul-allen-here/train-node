@@ -1,0 +1,36 @@
+<%- include("partials/header") %>
+
+<div class="content sign-form">
+    <form class="form-content" action = "/login" method = "POST">
+
+        <div class = "logo-div">
+            <img class = "logo" src = "./journal2.png">
+        </div>
+        
+        <div class="field">
+            <label class="label">Email</label>
+            <div class="control">
+                <input name = "email" class="input" type="email" placeholder="name@example.com" required>
+            </div>
+        </div>
+        
+        <div class="field">
+            <label class="label">Password</label>
+            <div class="control">
+                <input name = "password" class="input" type="password" placeholder="Your password" required>
+            </div>
+        </div>
+        
+        <div class="field is-grouped">
+            <div class="control">
+                <button type = "submit" class="button is-primary">Login</button>
+            </div>
+            <div class="control">
+                <button class = "button is-text"><a href="/">Cancel</a></button>
+            </div>
+        </div>
+
+    </form>
+</div>
+
+<%- include("partials/footer") %>

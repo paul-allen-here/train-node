@@ -1,0 +1,32 @@
+.footer {
+    background-color: white;
+}
+
+a {
+    color: black;
+}
+
+a :hover {
+    color: rgb(28, 28, 160);
+}
+
+.sign-form {
+    display: flex;
+    justify-content: center;
+}
+
+.form-content {
+    width: 450px;
+}
+
+.logo-div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 150px;
+}
+
+.logo {
+    width: 270px;
+    height: 140px;
+}

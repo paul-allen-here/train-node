@@ -1,0 +1,17 @@
+<%- include("partials/header") %>
+
+<div class="content" >
+    <h2 class="title is-2">Home</h2>
+    <p> <%= homeContent %> </p>
+</div>
+
+<% for (post of homePosts) { %>
+    <div class="content">
+        <h4 class="title is-4">
+            <%- '<a href="/post/'+ post.title +'">'+post.title+'</a>' %>
+        </h4>
+        <p> <%= post.content %> </p>
+    </div>
+<% } %>
+
+<%- include("partials/footer") %>
