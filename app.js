@@ -115,7 +115,7 @@ app.post("/register", (req, res) => {
   const newUser = new User ({
     name: req.body.username,
     email: req.body.email,
-    password: md5(req.body.password)
+    password: md5(process.env.SECRET + req.body.password)
   });
 
   newUser.save();
@@ -139,7 +139,7 @@ app.post("/login", (req, res) => {
       if (foundUser) {
         console.log(foundUser);
         console.log("User founded!");
-        if (foundUser.password === md5(req.body.password)) {
+        if (foundUser.password === md5(process.env.SECRET + req.body.password)) {
           res.send("<h2>You logged in successfully</h2><br /><a href = '/'>Homepage</a>");
         } else {
           res.send("<h2>Password is invalid</h2><br /><a href = '/'>Homepage</a>");
