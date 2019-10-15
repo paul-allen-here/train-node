@@ -5,11 +5,11 @@ const bodyParser = require("body-parser");
 const ejs = require("ejs");
 const _ = require("lodash");
 const mongoose = require('mongoose');
-const encrypt = require("mongoose-encryption");
+const md5 = require("md5");
 
-const homeStartingContent = "This is a home page for someone who loves Julia. All his thoughts are here. When he won't be able to keep it he will write everything here. Don't EVER show this to her or he will eventually die!";
-const aboutContent = "Hac habitasse platea dictumst vestibulum rhoncus est pellentesque. Dictumst vestibulum rhoncus est pellentesque elit ullamcorper. Non diam phasellus vestibulum lorem sed. Platea dictumst quisque sagittis purus sit. Egestas sed sed risus pretium quam vulputate dignissim suspendisse. Mauris in aliquam sem fringilla. Semper risus in hendrerit gravida rutrum quisque non tellus orci. Amet massa vitae tortor condimentum lacinia quis vel eros. Enim ut tellus elementum sagittis vitae. Mauris ultrices eros in cursus turpis massa tincidunt dui.";
-const contactContent = "Scelerisque eleifend donec pretium vulputate sapien. Rhoncus urna neque viverra justo nec ultrices. Arcu dui vivamus arcu felis bibendum. Consectetur adipiscing elit duis tristique. Risus viverra adipiscing at in tellus integer feugiat. Sapien nec sagittis aliquam malesuada bibendum arcu vitae. Consequat interdum varius sit amet mattis. Iaculis nunc sed augue lacus. Interdum posuere lorem ipsum dolor sit amet consectetur adipiscing elit. Pulvinar elementum integer enim neque. Ultrices gravida dictum fusce ut placerat orci nulla. Mauris in aliquam sem fringilla ut morbi tincidunt. Tortor posuere ac ut consequat semper viverra nam libero.";
+const homeStartingContent = "Simple blog app.";
+const aboutContent = "Hac habitasse platea dictumst vestibulum rhoncus est pellentesque. Dictumst vestibulum rhoncus est pellentesque elit ullamcorper.";
+const contactContent = "Scelerisque eleifend donec pretium vulputate sapien. Rhoncus urna neque viverra justo nec ultrices.";
 
 const app = express();
 
@@ -30,11 +30,6 @@ const userSchema = new mongoose.Schema ({
   name: String,
   email: String,
   password: String
-});
-
-userSchema.plugin(encrypt, {
-  secret: process.env.SECRET,
-  encryptedFields: ["password"]
 });
 
 const Post = mongoose.model("Post", postSchema);
@@ -114,15 +109,13 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
 
   console.log(req.body.username);
-
   console.log(req.body.email);
-
   console.log(req.body.password);
 
   const newUser = new User ({
     name: req.body.username,
     email: req.body.email,
-    password: req.body.password
+    password: md5(req.body.password)
   });
 
   newUser.save();
@@ -137,18 +130,16 @@ app.get("/login", (req, res) => {
 app.post("/login", (req, res) => {
 
   console.log(req.body.email);
-
   console.log(req.body.password);
 
   User.findOne({email: req.body.email}, (err, foundUser) => {
     if (err) {
       console.log(err);
     } else {
-      console.log("In the else!");
       if (foundUser) {
         console.log(foundUser);
         console.log("User founded!");
-        if (foundUser.password === req.body.password) {
+        if (foundUser.password === md5(req.body.password)) {
           res.send("<h2>You logged in successfully</h2><br /><a href = '/'>Homepage</a>");
         } else {
           res.send("<h2>Password is invalid</h2><br /><a href = '/'>Homepage</a>");
@@ -157,19 +148,6 @@ app.post("/login", (req, res) => {
         res.send("<h2>User not found</h2><br /><a href = '/'>Homepage</a>");
       }
     }
-  });
-
-});
-
-app.get("/about", (req, res) => {
-  res.render("about", {
-    aboutContent: aboutContent
-  });
-});
-
-app.get("/contact", (req, res) => {
-  res.render("contact", {
-    contactContent: contactContent
   });
 });
 
@@ -189,6 +167,18 @@ app.post("/compose", (req, res) => {
   newPost.save();
 
   res.render("compose", {});
+});
+
+app.get("/about", (req, res) => {
+  res.render("about", {
+    aboutContent: aboutContent
+  });
+});
+
+app.get("/contact", (req, res) => {
+  res.render("contact", {
+    contactContent: contactContent
+  });
 });
 
 app.listen(3000, () => {
