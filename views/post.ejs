@@ -3,6 +3,9 @@
 <div class="content">
     <h2 class="title is-2"> <%= postTitle %> </h2>
     <p> <%= postContent %> </p>
+    <div class = "post-footer">
+            <p class="help is-right" >By <%= postBy+" "+postTime %> </p>
+    </div>
 </div>
 
 <%- include("partials/footer") %>

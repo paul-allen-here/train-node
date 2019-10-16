@@ -2,6 +2,13 @@
     background-color: white;
 }
 
+nav {
+    font-family: monospace; 
+    letter-spacing: 0.1px; 
+    font-size: 16px;
+    box-shadow: 0 1px 10px -2px gray;
+}
+
 a {
     color: black;
 }
@@ -13,6 +20,14 @@ a :hover {
 .sign-form {
     display: flex;
     justify-content: center;
+    
+}
+
+.post-footer {
+    display: flex;
+    justify-content: flex-start;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding-left: 30px;
 }
 
 .form-content {

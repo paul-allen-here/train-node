@@ -42,7 +42,9 @@ const User = mongoose.model("User", userSchema);
 
 const postSchema = new mongoose.Schema ({
   title: String,
-  content: String
+  content: String,
+  by: String,
+  time: String
 });
 
 const Post = mongoose.model("Post", postSchema);
@@ -60,7 +62,7 @@ app.get("/", (req, res) => {
   Post.find({}, (err, returnedPosts) => {
     if (err) {
       console.log(err);
-      res.render("404", {session: req.session.email});
+      res.render("404", {session: req.session.name});
     } else {
       console.log(returnedPosts);
       for (post of returnedPosts) {
@@ -68,12 +70,14 @@ app.get("/", (req, res) => {
     
         truePosts.push({ 
           title : post.title,
-          content : shortContent
+          content : shortContent,
+          by : post.by,
+          time : post.time
          })
       }
     
       res.render("home", {
-        session: req.session.email,
+        session: req.session.name,
         homeContent: homeStartingContent,
         homePosts: truePosts
       });
@@ -91,7 +95,7 @@ app.get("/post/:post_id", (req, res) => {
   Post.find({}, (err, returnedPosts) => {
     if (err) {
       console.log("Can't get any posts!");
-      res.render("404", {session: req.session.email});
+      res.render("404", {session: req.session.name});
     } else {
 
       for (post of returnedPosts) {
@@ -104,14 +108,16 @@ app.get("/post/:post_id", (req, res) => {
       if (found) {
         console.log("Matched");
         res.render("post", {
-          session: req.session.email,
+          session: req.session.name,
           postTitle: actualPost.title,
-          postContent: actualPost.content
+          postContent: actualPost.content,
+          postBy: actualPost.by,
+          postTime: actualPost.time
         });
       }
       else {
         console.log("No matches found");
-        res.render("404", {session: req.session.email});
+        res.render("404", {session: req.session.name});
       }
     }
   })
@@ -119,7 +125,7 @@ app.get("/post/:post_id", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  res.render("register", {session: req.session.email});
+  res.render("register", {session: req.session.name});
 });
 
 app.post("/register", (req, res) => {
@@ -136,11 +142,11 @@ app.post("/register", (req, res) => {
 
   newUser.save();
 
-  res.render("register", {session: req.session.email});
+  res.render("register", {session: req.session.name});
 });
 
 app.get("/login", (req, res) => {
-  res.render("login", {session: req.session.email});
+  res.render("login", {session: req.session.name});
 });
 
 app.post("/login", (req, res) => {
@@ -156,11 +162,11 @@ app.post("/login", (req, res) => {
         console.log(foundUser);
         console.log("User founded!");
 
-        req.session.email = req.body.email;
-
         if (foundUser.password === md5(process.env.SECRET + req.body.password)) {
-          res.redirect("/")
+          req.session.name = foundUser.name;
+          res.redirect("/");
         } else {
+          req.session.destroy();
           res.send("<h2>Password is invalid</h2><br /><a href = '/'>Homepage</a>");
         }
       } else {
@@ -180,12 +186,12 @@ app.get('/logout',(req,res) => {
 });
 
 app.get("/compose", (req, res) => {
-  if (!req.session.email) {
+  if (!req.session.name) {
     console.log("No session!");
-    res.render("login", {session: req.session.email});
+    res.render("login", {session: req.session.name});
   } else {
     console.log("Founded session!");
-    res.render("compose", {session: req.session.email});
+    res.render("compose", {session: req.session.name});
   }
   
 });
@@ -196,7 +202,9 @@ app.post("/compose", (req, res) => {
 
   const newPost = new Post ({
     title: req.body.postTitle,
-    content: req.body.postContent
+    content: req.body.postContent,
+    by: req.session.name,
+    time: getDate()
   })
 
   newPost.save();
@@ -206,14 +214,14 @@ app.post("/compose", (req, res) => {
 
 app.get("/about", (req, res) => {
   res.render("about", {
-    session: req.session.email,
+    session: req.session.name,
     aboutContent: aboutContent
   });
 });
 
 app.get("/contact", (req, res) => {
   res.render("contact", {
-    session: req.session.email,
+    session: req.session.name,
     contactContent: contactContent
   });
 });
@@ -221,3 +229,16 @@ app.get("/contact", (req, res) => {
 app.listen(3000, () => {
   console.log("Server for a blog started on port 3000");
 });
+
+const getDate = function () {
+  const today = new Date();
+
+  const options = {
+      weekday: 'long',
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric'
+  }
+  
+  return today.toLocaleDateString('en-US', options);
+}
