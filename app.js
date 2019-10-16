@@ -2,13 +2,13 @@
 require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
+const cookieParser = require("cookie-parser");
 const ejs = require("ejs");
 const _ = require("lodash");
 const mongoose = require('mongoose');
 
 const session = require("express-session");
-const passport = require("passport");
-const passportLocalMongoose = require("passport-local-mongoose");
+//const passport = require("passport");
 
 const md5 = require("md5");
 
@@ -20,17 +20,9 @@ const app = express();
 
 app.set('view engine', 'ejs');
 
+app.use(cookieParser());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static("public"));
-
-app.use(session({
-  secret: "ourlittlesecret.",
-  resave: false,
-  saveUninitialized: false
-}));
-
-app.use(passport.initialize());
-app.use(passport.session());
 
 const uri = "mongodb+srv://vova:"+ process.env.BD_PASS +"@bloglvluptest-iyvhk.mongodb.net/blog_base?retryWrites=true&w=majority";
 mongoose.connect(uri, {useNewUrlParser: true, useUnifiedTopology: true }).then(
@@ -46,14 +38,7 @@ const userSchema = new mongoose.Schema ({
   password: String
 });
 
-userSchema.plugin(passportLocalMongoose);
-
 const User = mongoose.model("User", userSchema);
-
-passport.use(User.createStrategy());
-
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
 
 const postSchema = new mongoose.Schema ({
   title: String,
@@ -62,6 +47,11 @@ const postSchema = new mongoose.Schema ({
 
 const Post = mongoose.model("Post", postSchema);
 
+app.use(session({
+  secret: 'secretIsHere',
+  resave: true,
+  saveUninitialized: false,
+}))
 
 app.get("/", (req, res) => {
 
@@ -70,7 +60,7 @@ app.get("/", (req, res) => {
   Post.find({}, (err, returnedPosts) => {
     if (err) {
       console.log(err);
-      res.render("404", {});
+      res.render("404", {session: req.session.email});
     } else {
       console.log(returnedPosts);
       for (post of returnedPosts) {
@@ -83,6 +73,7 @@ app.get("/", (req, res) => {
       }
     
       res.render("home", {
+        session: req.session.email,
         homeContent: homeStartingContent,
         homePosts: truePosts
       });
@@ -100,7 +91,7 @@ app.get("/post/:post_id", (req, res) => {
   Post.find({}, (err, returnedPosts) => {
     if (err) {
       console.log("Can't get any posts!");
-      res.render("404", {});
+      res.render("404", {session: req.session.email});
     } else {
 
       for (post of returnedPosts) {
@@ -113,22 +104,22 @@ app.get("/post/:post_id", (req, res) => {
       if (found) {
         console.log("Matched");
         res.render("post", {
+          session: req.session.email,
           postTitle: actualPost.title,
           postContent: actualPost.content
         });
       }
       else {
         console.log("No matches found");
-        res.render("404", {});
+        res.render("404", {session: req.session.email});
       }
-
     }
   })
 
 });
 
 app.get("/register", (req, res) => {
-  res.render("register", {});
+  res.render("register", {session: req.session.email});
 });
 
 app.post("/register", (req, res) => {
@@ -145,11 +136,11 @@ app.post("/register", (req, res) => {
 
   newUser.save();
 
-  res.render("register", {});
+  res.render("register", {session: req.session.email});
 });
 
 app.get("/login", (req, res) => {
-  res.render("login", {});
+  res.render("login", {session: req.session.email});
 });
 
 app.post("/login", (req, res) => {
@@ -164,8 +155,11 @@ app.post("/login", (req, res) => {
       if (foundUser) {
         console.log(foundUser);
         console.log("User founded!");
+
+        req.session.email = req.body.email;
+
         if (foundUser.password === md5(process.env.SECRET + req.body.password)) {
-          res.send("<h2>You logged in successfully</h2><br /><a href = '/'>Homepage</a>");
+          res.redirect("/")
         } else {
           res.send("<h2>Password is invalid</h2><br /><a href = '/'>Homepage</a>");
         }
@@ -176,8 +170,24 @@ app.post("/login", (req, res) => {
   });
 });
 
+app.get('/logout',(req,res) => {
+  req.session.destroy((err) => {
+      if (err) {
+          return console.log(err);
+      }
+      res.redirect('/');
+  });
+});
+
 app.get("/compose", (req, res) => {
-  res.render("compose", {});
+  if (!req.session.email) {
+    console.log("No session!");
+    res.render("login", {session: req.session.email});
+  } else {
+    console.log("Founded session!");
+    res.render("compose", {session: req.session.email});
+  }
+  
 });
 
 app.post("/compose", (req, res) => {
@@ -191,17 +201,19 @@ app.post("/compose", (req, res) => {
 
   newPost.save();
 
-  res.render("compose", {});
+  res.redirect("/");
 });
 
 app.get("/about", (req, res) => {
   res.render("about", {
+    session: req.session.email,
     aboutContent: aboutContent
   });
 });
 
 app.get("/contact", (req, res) => {
   res.render("contact", {
+    session: req.session.email,
     contactContent: contactContent
   });
 });
