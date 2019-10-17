@@ -11,16 +11,15 @@
 <br />
 
 <% for (post of homePosts) { %>
-    <div class="content">
-        <h4 class="title is-4">
-            <%- '<a href="/post/'+ post.title +'">'+post.title+'</a>' %>
-        </h4>
-        <p> <%= post.content %> </p>
+    <h4 class="title is-4">
+        <%- '<a href="/post/'+ post.title +'">'+post.title+'</a>' %>
+    </h4>
+    <div class="content message is-dark">
+        <p class = "message-body"> <%= post.content %> </p>
         <div class = "post-footer">
-            <p class="help" >By <%= post.by+" "+post.time %> </p>
+            <p class="message-header help" >By <%= post.by+" "+post.time %> </p>
         </div>
     </div>
-    <br />
 <% } %>
 
 <%- include("partials/footer") %>

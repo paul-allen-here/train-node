@@ -66,7 +66,7 @@ app.get("/", (req, res) => {
     } else {
       console.log(returnedPosts);
       for (post of returnedPosts) {
-        shortContent = _.truncate(post.content, {'length': 60});
+        shortContent = _.truncate(post.content, {'length': 120});
     
         truePosts.push({ 
           title : post.title,

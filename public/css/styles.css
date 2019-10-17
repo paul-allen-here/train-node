@@ -27,7 +27,7 @@ a :hover {
     display: flex;
     justify-content: flex-start;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    padding-left: 30px;
+    padding-left: 50px;
 }
 
 .form-content {

@@ -1,10 +1,10 @@
 <%- include("partials/header") %>
 
-<div class="content">
-    <h2 class="title is-2"> <%= postTitle %> </h2>
-    <p> <%= postContent %> </p>
+<h2 class="title is-2"> <%= postTitle %> </h2>
+<div class="content message is-dark">
+    <p class = "message-body"> <%= postContent %> </p>
     <div class = "post-footer">
-            <p class="help is-right" >By <%= postBy+" "+postTime %> </p>
+        <p class="message-header help" >By <%= postBy+" "+postTime %> </p>
     </div>
 </div>
 
