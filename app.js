@@ -92,21 +92,13 @@ app.get("/post/:post_id", (req, res) => {
   let found = false;
   let actualPost = {};
 
-  Post.find({}, (err, returnedPosts) => {
+  Post.findOne({_id : req.params.post_id}, (err, returnedPost) => {
     if (err) {
       console.log("Can't get any posts!");
       res.render("404", {session: req.session.name});
     } else {
 
-      for (post of returnedPosts) {
-        console.log(post.title);
-        if (_.kebabCase(post.title) == _.kebabCase(post_name)) {
-          actualPost = post;
-          found = true;
-        }
-      }
-      if (found) {
-        console.log("Matched");
+      if (found) { 
         res.render("post", {
           session: req.session.name,
           postTitle: actualPost.title,
