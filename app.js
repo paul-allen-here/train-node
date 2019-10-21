@@ -3,9 +3,9 @@ require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
-const ejs = require("ejs");
-const _ = require("lodash");
 const mongoose = require('mongoose');
+const _ = require("lodash");
+const ejs = require("ejs");
 
 const session = require("express-session");
 //const passport = require("passport");
