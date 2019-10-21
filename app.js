@@ -25,10 +25,9 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static("public"));
 
 const uri = "mongodb+srv://vova:"+ process.env.BD_PASS +"@bloglvluptest-iyvhk.mongodb.net/blog_base?retryWrites=true&w=majority";
-mongoose.connect(uri, {useNewUrlParser: true, useUnifiedTopology: true }).then(
-  () => {console.log("DB Connected")},
-  () => {console.error(err)}
-);
+mongoose.connect(uri, {useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => {console.log("DB Connected")})
+  .catch(console.log());
 
 mongoose.set("useCreateIndex", true);
 
@@ -229,7 +228,7 @@ app.get("/contact", (req, res) => {
 // app.set('port', process.env.PORT || 3000);
 
 app.listen(process.env.PORT || 3000, () => {
-  console.log("Server for a blog started on port 3000");
+  console.log("Server for a blog started on port ", process.env.PORT || 3000);
 });
 
 const getDate = function () {
