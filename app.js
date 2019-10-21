@@ -3,9 +3,9 @@ require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
-const ejs = require("ejs");
-const _ = require("lodash");
 const mongoose = require('mongoose');
+const _ = require("lodash");
+const ejs = require("ejs");
 
 const session = require("express-session");
 //const passport = require("passport");
@@ -16,6 +16,8 @@ const homeStartingContent = "Simple blog app.";
 const aboutContent = "Hac habitasse platea dictumst vestibulum rhoncus est pellentesque. Dictumst vestibulum rhoncus est pellentesque elit ullamcorper.";
 const contactContent = "Scelerisque eleifend donec pretium vulputate sapien. Rhoncus urna neque viverra justo nec ultrices.";
 
+
+const PORT = process.env.PORT || 5000;
 const app = express();
 
 app.set('view engine', 'ejs');
@@ -25,10 +27,9 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static("public"));
 
 const uri = "mongodb+srv://vova:"+ process.env.BD_PASS +"@bloglvluptest-iyvhk.mongodb.net/blog_base?retryWrites=true&w=majority";
-mongoose.connect(uri, {useNewUrlParser: true, useUnifiedTopology: true }).then(
-  () => {console.log("DB Connected")},
-  () => {console.error(err)}
-);
+mongoose.connect(uri, {useNewUrlParser: true, useUnifiedTopology: true })
+  .then(() => console.log('MongoDB connected...'))
+  .catch(err => console.log(err));
 
 mongoose.set("useCreateIndex", true);
 
@@ -218,8 +219,10 @@ app.get("/contact", (req, res) => {
   });
 });
 
-app.listen(3000, () => {
-  console.log("Server for a blog started on port 3000");
+// app.set('port', process.env.PORT || 3000);
+
+app.listen(PORT, () => {
+  console.log("Server for a blog started on port ", PORT);
 });
 
 const getDate = function () {
