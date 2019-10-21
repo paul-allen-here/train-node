@@ -16,6 +16,8 @@ const homeStartingContent = "Simple blog app.";
 const aboutContent = "Hac habitasse platea dictumst vestibulum rhoncus est pellentesque. Dictumst vestibulum rhoncus est pellentesque elit ullamcorper.";
 const contactContent = "Scelerisque eleifend donec pretium vulputate sapien. Rhoncus urna neque viverra justo nec ultrices.";
 
+
+const PORT = process.env.PORT || 5000;
 const app = express();
 
 app.set('view engine', 'ejs');
@@ -227,8 +229,8 @@ app.get("/contact", (req, res) => {
 
 // app.set('port', process.env.PORT || 3000);
 
-app.listen(process.env.PORT || 3000, () => {
-  console.log("Server for a blog started on port ", process.env.PORT || 3000);
+app.listen(PORT, () => {
+  console.log("Server for a blog started on port ", PORT);
 });
 
 const getDate = function () {
