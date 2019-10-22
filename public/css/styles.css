@@ -20,7 +20,11 @@ a :hover {
 .sign-form {
     display: flex;
     justify-content: center;
-    
+}
+
+.delete-button {
+    display: flex;
+    justify-content: flex-end;
 }
 
 .post-footer {

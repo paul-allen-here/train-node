@@ -12,12 +12,12 @@
 
 <% for (post of homePosts) { %>
     <h4 class="title is-4">
-        <%- '<a href="/post/'+ post.title +'">'+post.title+'</a>' %>
+        <%- '<a href="/post/'+ post.id +'">'+post.title+'</a>' %>
     </h4>
     <div class="content message is-dark">
         <p class = "message-body"> <%= post.content %> </p>
         <div class = "post-footer">
-            <p class="message-header help" >By <%= post.by+" "+post.time %> </p>
+            <p class="message-header help" >By <%= post.by+". "+post.time %> </p>
         </div>
     </div>
 <% } %>

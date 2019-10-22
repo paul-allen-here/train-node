@@ -4,8 +4,16 @@
 <div class="content message is-dark">
     <p class = "message-body"> <%= postContent %> </p>
     <div class = "post-footer">
-        <p class="message-header help" >By <%= postBy+" "+postTime %> </p>
+        <p class="message-header help" >By <%= postBy+". "+postTime %> </p>
     </div>
 </div>
+
+<% if (createdBy === session) { %>
+    <div class = "delete-button">
+        <button class="button is-primary is-right" >
+            <%- '<a href="/post/'+ id +'/delete">Delete</a>' %>
+        </button>
+    </div>
+<% } %>
 
 <%- include("partials/footer") %>

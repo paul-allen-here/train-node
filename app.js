@@ -3,52 +3,28 @@ require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
-const mongoose = require('mongoose');
+//const mongoose = require('mongoose');
 const _ = require("lodash");
 const ejs = require("ejs");
+const md5 = require("md5");
+
+const bd = require(__dirname + "/bd"); //BD FUNCTIONS.
 
 const session = require("express-session");
 //const passport = require("passport");
 
-const md5 = require("md5");
-
-const homeStartingContent = "Simple blog app.";
-const aboutContent = "Hac habitasse platea dictumst vestibulum rhoncus est pellentesque. Dictumst vestibulum rhoncus est pellentesque elit ullamcorper.";
-const contactContent = "Scelerisque eleifend donec pretium vulputate sapien. Rhoncus urna neque viverra justo nec ultrices.";
-
-
 const PORT = process.env.PORT || 5000;
 const app = express();
+
+const homeStartingContent = "Simple blog app.";
+const aboutContent = "Hac habitasse platea dictumst vestibulum rhoncus est.";
+const contactContent = "Scelerisque eleifend donec pretium vulputate sapien.";
 
 app.set('view engine', 'ejs');
 
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static("public"));
-
-const uri = "mongodb+srv://vova:"+ process.env.BD_PASS +"@bloglvluptest-iyvhk.mongodb.net/blog_base?retryWrites=true&w=majority";
-mongoose.connect(uri, {useNewUrlParser: true, useUnifiedTopology: true })
-  .then(() => console.log('MongoDB connected...'))
-  .catch(err => console.log(err));
-
-mongoose.set("useCreateIndex", true);
-
-const userSchema = new mongoose.Schema ({
-  name: String,
-  email: String,
-  password: String
-});
-
-const User = mongoose.model("User", userSchema);
-
-const postSchema = new mongoose.Schema ({
-  title: String,
-  content: String,
-  by: String,
-  time: String
-});
-
-const Post = mongoose.model("Post", postSchema);
 
 app.use(session({
   secret: 'secretIsHere',
@@ -57,114 +33,115 @@ app.use(session({
 }))
 
 app.get("/", (req, res) => {
-
-  let truePosts = [];
-
-  Post.find({}, (err, returnedPosts) => {
-    if (err) {
-      console.log(err);
-      res.render("404", {session: req.session.name});
-    } else {
-      console.log(returnedPosts);
-      for (post of returnedPosts) {
-        shortContent = _.truncate(post.content, {'length': 120});
-    
-        truePosts.push({ 
-          title : post.title,
-          content : shortContent,
-          by : post.by,
-          time : post.time
-         })
-      }
-    
+  bd.getPosts().then((posts) => {
+    if (!posts ) {
+        res.render("404", {session: req.session.email});
+    }
+    if (posts.length < 1) {
       res.render("home", {
-        session: req.session.name,
+        session: req.session.email,
         homeContent: homeStartingContent,
-        homePosts: truePosts
+        homePosts: []
+      });
+    } else {
+      res.render("home", {
+        session: req.session.email,
+        homeContent: homeStartingContent,
+        homePosts: posts
       });
     }
-  })
-
+  });
 });
 
 app.get("/post/:post_id", (req, res) => {
-
-  let post_name = req.params.post_id;
-  let found = false;
-  let actualPost = {};
-
-  Post.findOne({_id : req.params.post_id}, (err, returnedPost) => {
-    if (err) {
-      console.log("Can't get any posts!");
-      res.render("404", {session: req.session.name});
+  let post_id = req.params.post_id;
+  console.log(post_id);
+  bd.getOnePost(post_id).then((post) => {
+    if (!post) {
+        res.render("404", {session: req.session.email});
     } else {
-
-      if (found) { 
+      console.log(post);
+      if (post.id === post_id) { 
         res.render("post", {
-          session: req.session.name,
-          postTitle: actualPost.title,
-          postContent: actualPost.content,
-          postBy: actualPost.by,
-          postTime: actualPost.time
+          id: post_id,
+          session: req.session.email,
+          postTitle: post.title,
+          postContent: post.content,
+          postBy: post.by,
+          postTime: post.time,
+          createdBy: post.creator_id
         });
       }
-      else {
-        console.log("No matches found");
-        res.render("404", {session: req.session.name});
-      }
     }
-  })
+  });
+});
 
+app.get("/compose", (req, res) => {
+  if (!req.session.email) {
+    console.log("No session!");
+    res.render("login", {session: req.session.email});
+  } else {
+    console.log("Founded session!");
+    res.render("compose", {session: req.session.email});
+  }
+});
+
+app.post("/compose", (req, res) => {
+  console.log(req.body);
+  const composedPost = {
+    id : _.kebabCase(req.body.postTitle),
+    title : req.body.postTitle,
+    content : req.body.postContent,
+    by : req.session.name,
+    time : getDate(),
+    creator_id: req.session.email
+  }
+  bd.composePost(composedPost).then(() => {
+    res.redirect("/");
+  });
 });
 
 app.get("/register", (req, res) => {
-  res.render("register", {session: req.session.name});
+  res.render("register", {session: req.session.email});
 });
 
 app.post("/register", (req, res) => {
-
   console.log(req.body.username);
   console.log(req.body.email);
   console.log(req.body.password);
-
-  const newUser = new User ({
+  const user = {
     name: req.body.username,
     email: req.body.email,
     password: md5(process.env.SECRET + req.body.password)
+  };
+  bd.registerUser(user).then(() => {
+    res.render("login", {session: req.session.email});
   });
-
-  newUser.save();
-
-  res.render("register", {session: req.session.name});
 });
 
 app.get("/login", (req, res) => {
-  res.render("login", {session: req.session.name});
+  res.render("login", {session: req.session.email});
 });
 
 app.post("/login", (req, res) => {
 
+  let email = req.body.email;
   console.log(req.body.email);
   console.log(req.body.password);
 
-  User.findOne({email: req.body.email}, (err, foundUser) => {
-    if (err) {
-      console.log(err);
+  bd.loginUser(email).then((user) => {
+    if (!user) {
+        res.render("404", {session: req.session.email});
     } else {
-      if (foundUser) {
-        console.log(foundUser);
-        console.log("User founded!");
-
-        if (foundUser.password === md5(process.env.SECRET + req.body.password)) {
-          req.session.name = foundUser.name;
-          res.redirect("/");
+      console.log(user);
+      if (user.password === md5(process.env.SECRET + req.body.password)) { 
+        req.session.email = user.email;
+        req.session.name = user.name;
+        res.redirect("/");
         } else {
           req.session.destroy();
           res.send("<h2>Password is invalid</h2><br /><a href = '/'>Homepage</a>");
         }
-      } else {
-        res.send("<h2>User not found</h2><br /><a href = '/'>Homepage</a>");
-      }
     }
   });
 });
@@ -178,62 +155,31 @@ app.get('/logout',(req,res) => {
   });
 });
 
-app.get("/compose", (req, res) => {
-  if (!req.session.name) {
-    console.log("No session!");
-    res.render("login", {session: req.session.name});
-  } else {
-    console.log("Founded session!");
-    res.render("compose", {session: req.session.name});
-  }
-  
-});
-
-app.post("/compose", (req, res) => {
-  
-  console.log(req.body);
-
-  const newPost = new Post ({
-    title: req.body.postTitle,
-    content: req.body.postContent,
-    by: req.session.name,
-    time: getDate()
-  })
-
-  newPost.save();
-
-  res.redirect("/");
-});
-
 app.get("/about", (req, res) => {
   res.render("about", {
-    session: req.session.name,
+    session: req.session.email,
     aboutContent: aboutContent
   });
 });
 
 app.get("/contact", (req, res) => {
   res.render("contact", {
-    session: req.session.name,
+    session: req.session.email,
     contactContent: contactContent
   });
 });
-
-// app.set('port', process.env.PORT || 3000);
 
 app.listen(PORT, () => {
   console.log("Server for a blog started on port ", PORT);
 });
 
-const getDate = function () {
+const getDate = () => {
   const today = new Date();
-
   const options = {
       weekday: 'long',
       day: 'numeric',
       month: 'long',
       year: 'numeric'
   }
-  
   return today.toLocaleDateString('en-US', options);
 }
