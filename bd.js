@@ -26,7 +26,7 @@ const postSchema = new mongoose.Schema ({
 
 const Post = mongoose.model("Post", postSchema);
 
-const getPosts = (page) => {
+const getPosts = (page = 1) => {
     let resPerPage = 10;
     return Post.find({})
         .skip((resPerPage * page) - resPerPage)

@@ -22,7 +22,6 @@ const app = express();
 const homeStartingContent = "Simple blog app.";
 const aboutContent = "Hac habitasse platea dictumst vestibulum rhoncus est.";
 const contactContent = "Scelerisque eleifend donec pretium vulputate sapien.";
-const warning = "You are not authorized to perform this action.";
 app.set('view engine', 'ejs');
 
 app.use(cookieParser());
@@ -36,12 +35,13 @@ app.use(session({
 }))
 
 app.get("/", (req, res) => {
-  res.redirect("/1");
-});
-
-app.get("/:page", (req, res) => {
 
   let page = req.params.post_id;
+  console.log(req.params.page);
+
+  if (!page) {
+    page = 1;
+  }
 
   bd.getPosts(page).then((posts) => {
     if (!posts ) {
