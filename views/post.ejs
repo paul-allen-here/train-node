@@ -9,11 +9,12 @@
 </div>
 
 <% if (createdBy === session) { %>
-    <div class = "delete-button">
-        <button class="button is-primary is-right" >
-            <%- '<a href="/post/'+ id +'/delete">Delete</a>' %>
+    <form action = '<%= "/post/delete/" + id %>' method = "post" class = "delete-button">
+        <input type = "text" class = "secret" name = "secret" value = "<%= token %>" />
+        <button type = "submit" class="button is-primary is-right">
+            Delete
         </button>
-    </div>
+    </form>
 <% } %>
 
 <%- include("partials/footer") %>

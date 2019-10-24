@@ -26,8 +26,11 @@ const postSchema = new mongoose.Schema ({
 
 const Post = mongoose.model("Post", postSchema);
 
-const getPosts = () => {
-    return Post.find({}).exec(); 
+const getPosts = (page) => {
+    let resPerPage = 10;
+    return Post.find({})
+        .skip((resPerPage * page) - resPerPage)
+        .limit(resPerPage).exec();
 };
 
 const getOnePost = (post_id) => {
@@ -44,6 +47,10 @@ const composePost = (post) => {
         creator_id: post.creator_id
     });
     return newPost.save();
+};
+
+const deletePost = (post_id) => {
+    return Post.deleteOne({ id: post_id }).exec(); 
 };
 
 const registerUser = (user) => {
@@ -64,3 +71,4 @@ exports.getOnePost = getOnePost;
 exports.composePost = composePost;
 exports.registerUser = registerUser;
 exports.loginUser = loginUser;
+exports.deletePost = deletePost;

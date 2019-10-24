@@ -21,7 +21,9 @@ a :hover {
     display: flex;
     justify-content: center;
 }
-
+.secret {
+    visibility: hidden;
+}
 .delete-button {
     display: flex;
     justify-content: flex-end;

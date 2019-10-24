@@ -1,6 +1,12 @@
 <%- include("partials/header") %>
 
+<div class="sign-form">
+    <h4 class = "title is-4">Please login to proceed.</h4>
+</div>
+
+<br />
 <div class="content sign-form">
+
     <form class="form-content" action = "/login" method = "POST">
 
         <div class = "logo-div">
@@ -29,6 +35,9 @@
             </div>
             <div class="control">
                 <button class = "button is-text"><a href="/">Cancel</a></button>
+            </div>
+            <div class="control">
+                <button class="button is-text"><a href="/register">Don't have an account?</a></button>
             </div>
         </div>
 
