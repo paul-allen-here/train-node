@@ -34,6 +34,26 @@ app.use(session({
   saveUninitialized: false,
 }))
 
+
+app.get("/createposts", (req, res) => {
+  console.log(req.session.email);
+  if (req.session.email) {
+    const composedPost = {
+      id : _.kebabCase(req.body.postTitle),
+      title : faker.lorem.findName(),
+      content : faker.lorem.sentence(),
+      by : req.session.name,
+      time : getDate(),
+      creator_id: req.session.email
+    }
+    bd.composePost(composedPost).then(() => {
+      res.redirect("/");
+    });
+  } else {
+    res.redirect("/");
+  }
+});
+
 app.get("/", (req, res) => {
 
   let page = req.params.post_id;
